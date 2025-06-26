@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  phoneNumber  String?
+  profileImage String?
+  password     String
+  role         UserRole   @default(USER)
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+     enrollments Enrollment[]
+  reviews   Review[]
+
+  @@map("Users")
+}
+
+enum UserRole {
+  ADMIN
+  SUPER_ADMIN
+  USER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+
+
+model Course {
+  id          String       @id @default(uuid())
+  title       String
+  subtitle    String
+  price       Float
+  courseType  CourseType
+  level        SkillLevel  
+  duration    Int
+  language    String
+  classes     String
+  description String
+  demoVideo   String
+  thumnail    String
+  status      CourseStatus @default(ONGOING)
+  modules     Module[]
+  resources   Resource[]
+  enrollments Enrollment[]
+  reviews     Review[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+enum CourseType {
+  PAID
+  FREE
+}
+
+enum CourseStatus {
+  UPCOMING
+  ONGOING
+}
+
+model Module {
+  id        String   @id @default(uuid())
+  title     String
+  order     Int      
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  videos    Video[]
+  createdAt DateTime @default(now())
+}
+
+model Video {
+  id        String   @id @default(uuid())
+  title     String
+  url       String
+  order     Int
+  moduleId  String
+  module    Module   @relation(fields: [moduleId], references: [id])
+  videoResources String
+  createdAt DateTime @default(now())
+}
+
+// model VideoResource {
+//   id        String   @id @default(uuid())
+//   title     String
+//   url       String
+//   order     Int
+//   videoId   String
+//   video     Video    @relation(fields: [videoId], references: [id])
+//   createdAt DateTime @default(now())
+// }
+
+model Resource {
+  id        String   @id @default(uuid())
+  name      String
+  type      ResourceType
+  url       String
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+enum ResourceType {
+  PDF
+  DOC
+  LINK
+}
+
+model Enrollment {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  user      User     @relation(fields: [userId], references: [id])
+  course    Course   @relation(fields: [courseId], references: [id])
+  enrolledAt DateTime @default(now())
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int      @default(5)
+  comment   String
+  userId    String
+  courseId  String
+  user      User     @relation(fields: [userId], references: [id])
+  course    Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Contact{
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  description String 
+
+}
+
+model Subscription{
+  id        String   @id @default(uuid()) 
+  email     String 
+} 
