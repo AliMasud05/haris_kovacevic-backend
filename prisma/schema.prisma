@@ -19,8 +19,9 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-     enrollments Enrollment[]
-  reviews   Review[]
+  enrollments  Enrollment[]
+  reviews      Review[]
+  payments     Payment[]
 
   @@map("Users")
 }
@@ -57,6 +58,8 @@ model Course {
   resources   Resource[]
   enrollments Enrollment[]
   reviews     Review[]
+  payments    Payment[]
+
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }
@@ -92,19 +95,19 @@ model Video {
   order     Int
   moduleId  String
   module    Module   @relation(fields: [moduleId], references: [id])
-  videoResources String
+  videoResources VideoResource[]
   createdAt DateTime @default(now())
 }
 
-// model VideoResource {
-//   id        String   @id @default(uuid())
-//   title     String
-//   url       String
-//   order     Int
-//   videoId   String
-//   video     Video    @relation(fields: [videoId], references: [id])
-//   createdAt DateTime @default(now())
-// }
+model VideoResource {
+  id        String   @id @default(uuid())
+  title     String
+  url       String
+  order     Int
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id])
+  createdAt DateTime @default(now())
+}
 
 model Resource {
   id        String   @id @default(uuid())
@@ -126,9 +129,35 @@ model Enrollment {
   id        String   @id @default(uuid())
   userId    String
   courseId  String
+  Amount    Float
+  paymentStatus paymentStatusEnum @default(PENDING)
   user      User     @relation(fields: [userId], references: [id])
   course    Course   @relation(fields: [courseId], references: [id])
   enrolledAt DateTime @default(now())
+}
+
+enum paymentStatusEnum {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  courseId      String
+  paymentMethod String // e.g., 'Credit Card', 'PayPal', 'Stripe'
+  paymentStatus paymentStatusEnum @default(PENDING) // e.g., 'Pending', 'Completed', 'Failed'
+  paymentAmount Float         @default(0)
+  payableAmount Float         @default(0)
+  paymentDate   DateTime      @default(now())
+  transactionId String? // e.g., payment gateway transaction ID
+  userId        String
+
+  course        Course       @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model Review {

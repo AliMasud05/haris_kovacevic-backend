@@ -3,6 +3,7 @@ import { userRoutes } from "../modules/User/user.route";
 import { AuthRoutes } from "../modules/Auth/auth.routes";
 import { CourseRoutes } from "../modules/Course/course.route";
 import { ModuleRoutes } from "../modules/Module/module.route";
+import { StripePaymentRoutes } from "../modules/Stripe/Stripe.routes";
 
 
 const router = express.Router();
@@ -23,6 +24,10 @@ const moduleRoutes = [
   {
     path:"/module",
     route:ModuleRoutes
+  },
+  {
+    path: "/stripe-payments",
+    route: StripePaymentRoutes
   }
 
 ];
