@@ -13,8 +13,16 @@ const createCourse = async (payload: Course): Promise<Course> => {
 const getAllCourses = async (): Promise<Course[]> => {
   const result = await prisma.course.findMany({
     include: {
-      modules: true,
-      resources: true,
+      modules: {
+        include: {
+          videos: {
+            include: {
+              videoResources: true,
+            },
+          },
+        },
+      },
+
       enrollments: true,
       reviews: true,
     },

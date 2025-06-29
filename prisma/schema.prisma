@@ -46,7 +46,7 @@ model Course {
   subtitle    String
   price       Float
   courseType  CourseType
-  level        SkillLevel  
+  level       SkillLevel  
   duration    Int
   language    String
   classes     String
@@ -59,23 +59,10 @@ model Course {
   enrollments Enrollment[]
   reviews     Review[]
   payments    Payment[]
+  releaseDate DateTime?
 
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-}
-enum SkillLevel {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-}
-enum CourseType {
-  PAID
-  FREE
-}
-
-enum CourseStatus {
-  UPCOMING
-  ONGOING
 }
 
 model Module {
@@ -83,9 +70,12 @@ model Module {
   title     String
   order     Int      
   courseId  String
-  course    Course   @relation(fields: [courseId], references: [id])
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   videos    Video[]
   createdAt DateTime @default(now())
+
+  @@index([courseId])
+  @@map("modules")
 }
 
 model Video {
@@ -94,9 +84,12 @@ model Video {
   url       String
   order     Int
   moduleId  String
-  module    Module   @relation(fields: [moduleId], references: [id])
+  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   videoResources VideoResource[]
   createdAt DateTime @default(now())
+
+  @@index([moduleId])
+  @@map("videos")
 }
 
 model VideoResource {
@@ -105,10 +98,12 @@ model VideoResource {
   url       String
   order     Int
   videoId   String
-  video     Video    @relation(fields: [videoId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-}
 
+  @@index([videoId])
+  @@map("video_resources")
+}
 model Resource {
   id        String   @id @default(uuid())
   name      String
@@ -123,6 +118,20 @@ enum ResourceType {
   PDF
   DOC
   LINK
+}
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+enum CourseType {
+  PAID
+  FREE
+}
+
+enum CourseStatus {
+  UPCOMING
+  ONGOING
 }
 
 model Enrollment {
@@ -183,3 +192,11 @@ model Subscription{
   id        String   @id @default(uuid()) 
   email     String 
 } 
+
+model File {
+  id        String   @id @default(uuid())
+  url       String
+  altText   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

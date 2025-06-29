@@ -16,13 +16,13 @@ router.get("/:id", CourseController.getCourseById);
 
 router.patch(
   "/:id",
-  auth(UserRole.ADMIN, UserRole.ADMIN),
+  // auth(UserRole.ADMIN, UserRole.ADMIN),
   CourseController.updateCourse
 );
 
 router.delete(
   "/:id",
-  auth(UserRole.ADMIN, UserRole.ADMIN),
+  // auth(UserRole.ADMIN, UserRole.ADMIN),
   CourseController.deleteCourse
 );
 
