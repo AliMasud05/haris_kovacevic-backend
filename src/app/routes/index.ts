@@ -7,6 +7,7 @@ import { StripePaymentRoutes } from "../modules/Stripe/Stripe.routes";
 import { FileRoutes } from "../modules/Image/Image.routes";
 import { VideoRoutes } from "../modules/Video/video.route";
 import { VideoResourceRoutes } from "../modules/VideoResource/videoResource.route";
+import { ReviewRoutes } from "../modules/Review/review.route";
 
 
 const router = express.Router();
@@ -43,7 +44,11 @@ const moduleRoutes = [
   {
     path: "/video-resources",
     route:VideoResourceRoutes
-  }
+  },
+  {
+    path: "/reviews",
+    route: ReviewRoutes
+    }  
   
   
 

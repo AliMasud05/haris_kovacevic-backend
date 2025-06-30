@@ -17,7 +17,7 @@ router.get("/", userController.getUsers);
 // *!profile user
 router.put(
   "/profile",
-  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
+  // auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
   userController.updateProfile
 );
 

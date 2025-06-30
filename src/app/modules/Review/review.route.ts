@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post(
   "/",
-  auth(UserRole.USER, UserRole.ADMIN, ),
+  // auth(UserRole.USER, UserRole.ADMIN, ),
   ReviewController.createReview
 );
 
@@ -18,13 +18,13 @@ router.get("/user/:userId", ReviewController.getReviewsByUserId);
 
 router.patch(
   "/:id",
-  auth(UserRole.USER, UserRole.ADMIN),
+  // auth(UserRole.USER, UserRole.ADMIN),
   ReviewController.updateReview
 );
 
 router.delete(
   "/:id",
-  auth(UserRole.ADMIN,),
+  // auth(UserRole.ADMIN,),
   ReviewController.deleteReview
 );
 
