@@ -36,7 +36,15 @@ const getCourseById = async (id: string): Promise<Course | null> => {
       id,
     },
     include: {
-      modules: true,
+        modules: {
+        include: {
+          videos: {
+            include: {
+              videoResources: true,
+            },
+          },
+        },
+      },
       resources: true,
       enrollments: true,
       reviews: true,
