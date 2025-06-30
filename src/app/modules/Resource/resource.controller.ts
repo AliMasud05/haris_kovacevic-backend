@@ -3,7 +3,7 @@ import httpStatus from "http-status";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { ResourceService } from "./resource.service";
-import { ResourceType } from "@prisma/client";
+import { ResourceType, ResourceStatus } from "@prisma/client";
 
 const createResource = catchAsync(async (req: Request, res: Response) => {
   const result = await ResourceService.createResource(req.body);
@@ -73,6 +73,16 @@ const getResourcesByType = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getResourcesByStatus = catchAsync(async (req: Request, res: Response) => {
+  const { status } = req.params;
+  const result = await ResourceService.getResourcesByStatus(status as ResourceStatus);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Resources retrieved by status successfully",
+    data: result,
+  });
+});
+
 export const ResourceController = {
   createResource,
   getAllResources,
@@ -81,4 +91,5 @@ export const ResourceController = {
   deleteResource,
   getResourcesByCourseId,
   getResourcesByType,
+  getResourcesByStatus,
 };

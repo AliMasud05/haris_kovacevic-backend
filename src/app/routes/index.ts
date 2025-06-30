@@ -8,6 +8,7 @@ import { FileRoutes } from "../modules/Image/Image.routes";
 import { VideoRoutes } from "../modules/Video/video.route";
 import { VideoResourceRoutes } from "../modules/VideoResource/videoResource.route";
 import { ReviewRoutes } from "../modules/Review/review.route";
+import { ResourceRoutes } from "../modules/Resource/resource.route";
 
 
 const router = express.Router();
@@ -48,7 +49,11 @@ const moduleRoutes = [
   {
     path: "/reviews",
     route: ReviewRoutes
-    }  
+    },
+    {
+      path: "/resources",
+      route: ResourceRoutes
+    }
   
   
 

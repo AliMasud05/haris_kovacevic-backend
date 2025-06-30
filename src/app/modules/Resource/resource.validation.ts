@@ -1,17 +1,25 @@
 import { z } from "zod";
-import { ResourceType } from "@prisma/client";
+import { ResourceType, ResourceStatus } from "@prisma/client";
 
 const createResourceValidationSchema = z.object({
-  name: z.string().min(3).max(255),
+  title: z.string().min(3).max(255),
+  topic: z.string().min(3).max(255),
   type: z.nativeEnum(ResourceType),
-  url: z.string().url(),
+  status: z.nativeEnum(ResourceStatus),
+  price: z.number().min(0).optional(),
+  thumbnail: z.string().optional(),
+  file: z.string(),
   courseId: z.string().uuid(),
 });
 
 const updateResourceValidationSchema = z.object({
-  name: z.string().min(3).max(255).optional(),
+  title: z.string().min(3).max(255).optional(),
+  topic: z.string().min(3).max(255).optional(),
   type: z.nativeEnum(ResourceType).optional(),
-  url: z.string().url().optional(),
+  status: z.nativeEnum(ResourceStatus).optional(),
+  price: z.number().min(0).optional().nullable(),
+  thumbnail: z.string().optional().nullable(),
+  file: z.string().optional(),
   courseId: z.string().uuid().optional(),
 });
 

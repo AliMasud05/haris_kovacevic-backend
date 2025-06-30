@@ -32,7 +32,7 @@ const createReview = async (payload: Review): Promise<Review> => {
 const getAllReviews = async (): Promise<Review[]> => {
   return await prisma.review.findMany({
     include: {
-      user: { select: { id: true, name: true } },
+      user: { select: { id: true, name: true ,profileImage:true } },
       course: { select: { id: true, title: true } },
     },
   });
@@ -87,7 +87,7 @@ const getReviewsByCourseId = async (courseId: string): Promise<Review[]> => {
   return await prisma.review.findMany({
     where: { courseId },
     include: {
-      user: { select: { id: true, name: true } },
+      user: { select: { id: true, name: true,profileImage:true } },
     },
   });
 };
