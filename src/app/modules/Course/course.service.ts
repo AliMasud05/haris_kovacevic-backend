@@ -45,7 +45,6 @@ const getCourseById = async (id: string): Promise<Course | null> => {
           },
         },
       },
-      resources: true,
       enrollments: true,
       reviews: true,
     },
@@ -89,7 +88,6 @@ const getCoursesByStatus = async (status: CourseStatus): Promise<Course[]> => {
     },
     include: {
       modules: true,
-      resources: true,
       enrollments: true,
       reviews: true,
     },
@@ -104,7 +102,6 @@ const getCoursesByType = async (type: CourseType): Promise<Course[]> => {
     },
     include: {
       modules: true,
-      resources: true,
       enrollments: true,
       reviews: true,
     },
@@ -119,7 +116,6 @@ const getCoursesByLevel = async (level: SkillLevel): Promise<Course[]> => {
     },
     include: {
       modules: true,
-      resources: true,
       enrollments: true,
       reviews: true,
     },

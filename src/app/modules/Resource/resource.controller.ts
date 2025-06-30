@@ -53,15 +53,7 @@ const deleteResource = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getResourcesByCourseId = catchAsync(async (req: Request, res: Response) => {
-  const { courseId } = req.params;
-  const result = await ResourceService.getResourcesByCourseId(courseId);
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    message: "Resources retrieved by course ID successfully",
-    data: result,
-  });
-});
+
 
 const getResourcesByType = catchAsync(async (req: Request, res: Response) => {
   const { type } = req.params;
@@ -89,7 +81,6 @@ export const ResourceController = {
   getResourceById,
   updateResource,
   deleteResource,
-  getResourcesByCourseId,
   getResourcesByType,
   getResourcesByStatus,
 };

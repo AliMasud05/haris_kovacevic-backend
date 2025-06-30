@@ -9,9 +9,9 @@ const router = express.Router();
 router.post("/", ContactController.createContact);
 
 // Protected routes (admin only)
-router.get("/", auth(UserRole.ADMIN), ContactController.getAllContacts);
-router.get("/:id", auth(UserRole.ADMIN), ContactController.getContactById);
-router.patch("/:id", auth(UserRole.ADMIN), ContactController.updateContact);
-router.delete("/:id", auth(UserRole.ADMIN), ContactController.deleteContact);
+router.get("/",  ContactController.getAllContacts);
+router.get("/:id", ContactController.getContactById);
+router.patch("/:id",  ContactController.updateContact);
+router.delete("/:id", ContactController.deleteContact);
 
 export const ContactRoutes = router;

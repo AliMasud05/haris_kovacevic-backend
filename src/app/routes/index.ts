@@ -9,6 +9,7 @@ import { VideoRoutes } from "../modules/Video/video.route";
 import { VideoResourceRoutes } from "../modules/VideoResource/videoResource.route";
 import { ReviewRoutes } from "../modules/Review/review.route";
 import { ResourceRoutes } from "../modules/Resource/resource.route";
+import { ContactRoutes } from "../modules/Contact/contact.route";
 
 
 const router = express.Router();
@@ -53,7 +54,11 @@ const moduleRoutes = [
     {
       path: "/resources",
       route: ResourceRoutes
-    }
+    },
+    {
+      path: "/contacts",
+      route: ContactRoutes
+      }
   
   
 

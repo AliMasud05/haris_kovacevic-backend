@@ -9,7 +9,7 @@ const createResourceValidationSchema = z.object({
   price: z.number().min(0).optional(),
   thumbnail: z.string().optional(),
   file: z.string(),
-  courseId: z.string().uuid(),
+  
 });
 
 const updateResourceValidationSchema = z.object({
