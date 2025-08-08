@@ -6,24 +6,19 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import dotenv from "dotenv";
-import { Readable } from "stream";
 import ApiError from "../errors/ApiErrors";
 import httpStatus from "http-status";
-import { v4 as uuidv4 } from "uuid";
 
 dotenv.config();
 
-interface UploadResponse {
-  Location: string;
-}
-
 const s3Client = new S3Client({
-  region: "us-east-1", // Set any valid region
-  endpoint: process.env.DO_SPACE_ENDPOINT,
+  region: process.env.DO_SPACE_REGION,
+  endpoint: `https://${process.env.DO_SPACE_REGION}.digitaloceanspaces.com`, // ✅ Correct region endpoint
   credentials: {
     accessKeyId: process.env.DO_SPACE_ACCESS_KEY!,
     secretAccessKey: process.env.DO_SPACE_SECRET_KEY!,
   },
+  forcePathStyle: false,
 });
 
 export const uploadToDigitalOceanAWS = async (
@@ -36,11 +31,9 @@ export const uploadToDigitalOceanAWS = async (
       throw new ApiError(400, "File buffer is missing");
     }
 
-    // Generate a unique filename
     const timestamp = Date.now();
     const uniqueFileName = `${timestamp}_${fileName}`;
 
-    // Prepare the upload command
     const command = new PutObjectCommand({
       Bucket: process.env.DO_SPACE_BUCKET!,
       Key: uniqueFileName,
@@ -51,18 +44,15 @@ export const uploadToDigitalOceanAWS = async (
 
     await s3Client.send(command);
 
-    // Construct the direct URL to the uploaded file
-    const Location = `${process.env.DO_SPACE_ENDPOINT}/${process.env.DO_SPACE_BUCKET}/${uniqueFileName}`;
+    // ✅ Correct public URL
+    const Location = `https://${process.env.DO_SPACE_BUCKET}.${process.env.DO_SPACE_REGION}.digitaloceanspaces.com/${uniqueFileName}`;
 
     return { Location };
   } catch (error: any) {
     console.error(`Error uploading file: ${error.message}`);
-    throw new ApiError(400, error.message);
+    throw new ApiError(httpStatus.BAD_REQUEST, error.message);
   }
 };
-
-
-
 
 export const deleteFromDigitalOceanAWS = async (
   fileUrl: string
@@ -75,20 +65,18 @@ export const deleteFromDigitalOceanAWS = async (
       );
     }
 
-    // Extract the file key from the URL
+    // ✅ Extract key from full URL
     const key = fileUrl.replace(
-      `${process.env.DO_SPACE_ENDPOINT}/${process.env.DO_SPACE_BUCKET}/`,
+      `https://${process.env.DO_SPACE_BUCKET}.${process.env.DO_SPACE_REGION}.digitaloceanspaces.com/`,
       ""
     );
 
-    // Prepare the delete command
     const command = new DeleteObjectCommand({
       Bucket: process.env.DO_SPACE_BUCKET!,
       Key: key,
     });
 
     await s3Client.send(command);
-
     console.log(`Successfully deleted file: ${fileUrl}`);
   } catch (error: any) {
     console.error(`Error deleting file: ${fileUrl}`, error);
@@ -99,8 +87,6 @@ export const deleteFromDigitalOceanAWS = async (
   }
 };
 
-
-//delete multiple image url
 export const deleteMultipleFromDigitalOceanAWS = async (
   fileUrls: string[]
 ): Promise<void> => {
@@ -109,15 +95,13 @@ export const deleteMultipleFromDigitalOceanAWS = async (
       throw new ApiError(httpStatus.BAD_REQUEST, "No file URLs provided");
     }
 
-    // Extract file keys from URLs
     const objectKeys = fileUrls.map((fileUrl) =>
       fileUrl.replace(
-        `${process.env.DO_SPACE_ENDPOINT}/${process.env.DO_SPACE_BUCKET}/`,
+        `https://${process.env.DO_SPACE_BUCKET}.${process.env.DO_SPACE_REGION}.digitaloceanspaces.com/`,
         ""
       )
     );
 
-    // Prepare the delete command for multiple objects
     const command = new DeleteObjectsCommand({
       Bucket: process.env.DO_SPACE_BUCKET!,
       Delete: {
@@ -126,8 +110,6 @@ export const deleteMultipleFromDigitalOceanAWS = async (
     });
 
     await s3Client.send(command);
-
-    // console.log(`Successfully deleted files:`, fileUrls);
   } catch (error: any) {
     console.error(`Error deleting files:`, error);
     throw new ApiError(

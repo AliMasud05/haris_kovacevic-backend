@@ -6,12 +6,11 @@ import httpStatus from "http-status";
 import { string } from "zod";
 
 const loginUser = catchAsync(async (req: Request, res: Response) => {
-
   const result = await AuthServices.loginUser(req.body);
   res.cookie("token", result.token, { httpOnly: true });
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: "User logged in successfully",
+    message: result.message? result.message:"User logged in successfully",
     data: result,
   });
 });
@@ -35,6 +34,17 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
 
   const result = await AuthServices.getMyProfile(userId);
+  sendResponse(res, {
+    statusCode: 201,
+    message: "User profile retrieved successfully",
+    data: result,
+  });
+});
+// get user profile with progress
+const getMyProfileWithProgress = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+
+  const result = await AuthServices.getMyProfileWithProgress(userId);
   sendResponse(res, {
     statusCode: 201,
     message: "User profile retrieved successfully",
@@ -85,13 +95,39 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
   })
 });
 
+// forgot password
+const verifyOtp = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthServices.verifyOtp(req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: result.message,
+    data: { token: result.token },
+  });
+});
+
+const loginWithGoogle = catchAsync(async (req, res) => {
+  const result = await AuthServices.loginWithGoogle(req.body);
+  console.log(result,"loginWithGoogle");
+  res.cookie("token", result.token, { httpOnly: true });
+  sendResponse(res, {
+    statusCode: httpStatus.OK, 
+    message: "User logged in successfully",
+    data: result,
+  });
+});
+
+
 
 
 export const AuthController = {
   loginUser,
   logoutUser,
   getMyProfile,
+  getMyProfileWithProgress,
   changePassword,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  verifyOtp,
+  loginWithGoogle,
 };

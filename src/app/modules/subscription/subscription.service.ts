@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiErrors";
 import prisma from "../../../shared/prisma";
-import { Subscription } from "@prisma/client";
+import { Prisma, Subscription } from "@prisma/client";
 
 const subscribe = async (email: string): Promise<Subscription> => {
   // Check if email already exists
@@ -23,18 +23,51 @@ const getAllSubscriptions = async (): Promise<Subscription[]> => {
   return await prisma.subscription.findMany();
 };
 
-const unsubscribe = async (email: string): Promise<Subscription> => {
-  const result = await prisma.subscription.deleteMany({
-    where: { email },
-  });
+const unsubscribe = async (id: string): Promise<Subscription> => {
+   try {
+     // Attempt to delete the subscription
+     const result = await prisma.subscription.delete({
+       where: { id },
+     });
 
-  if (result.count === 0) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Subscription not found");
-  }
+     // Return the deleted subscription
+     return result;
+   } catch (error) {
+     // Handle the case where the subscription was not found
+     if (
+       error instanceof Prisma.PrismaClientKnownRequestError &&
+       error.code === "P2025"
+     ) {
+       throw new ApiError(httpStatus.NOT_FOUND, "Subscription not found");
+     }
 
-  // Optionally, return the deleted email or a custom object
-  return { email } as Subscription;
+     // Re-throw other unexpected errors
+     throw error;
+   }
 };
+
+//delete a subscription
+// const deleteSubscription = async (id: string): Promise<Subscription> => {
+//   try {
+//     // Attempt to delete the subscription
+//     const result = await prisma.subscription.delete({
+//       where: { id },
+//     });
+
+ 
+
+//     // Return the deleted subscription
+//     return result;
+//   } catch (error) {
+//     // Handle the case where the subscription was not found
+//     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+//       throw new ApiError(httpStatus.NOT_FOUND, "Subscription not found");
+//     }
+
+//     // Re-throw other unexpected errors
+//     throw error;
+//   }
+// };
 
 export const SubscriptionService = {
   subscribe,

@@ -22,21 +22,34 @@ const getAllCourses = async (): Promise<Course[]> => {
           },
         },
       },
-
       enrollments: true,
-      reviews: true,
+      reviews: false,
     },
   });
-  return result;
+
+  // Calculate discounted price for each course
+  const coursesWithDiscount = result.map((course) => {
+    console.log(course.price, course.discount);
+    return {
+      ...course,
+      discountedPrice: course.price - (course.price * course.discount / 100),
+    };
+  });
+
+  return coursesWithDiscount;
 };
 
-const getCourseById = async (id: string): Promise<Course | null> => {
-  const result = await prisma.course.findUnique({
-    where: {
-      id,
-    },
+type CourseWithExtras = Course & {
+  discountedPrice: number;
+  averageRating: number;
+  totalReviews: number;
+};
+
+const getCourseById = async (id: string): Promise<CourseWithExtras | null> => {
+  const course = await prisma.course.findUnique({
+    where: { id },
     include: {
-        modules: {
+      modules: {
         include: {
           videos: {
             include: {
@@ -46,17 +59,43 @@ const getCourseById = async (id: string): Promise<Course | null> => {
         },
       },
       enrollments: true,
-      reviews: true,
+      learningData: true,
+       reviews: {
+        include: {
+          course: {
+            select: {         
+              title: true,              
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              profileImage: true
+            }
+          }
+        }
+      },
     },
   });
 
-  if (!result) {
+  if (!course) {
     throw new ApiError(httpStatus.NOT_FOUND, "Course not found");
   }
 
-  return result;
-};
+  // Calculate average rating
+  const averageRating = course.reviews.length > 0 
+    ? Math.round((course.reviews.reduce((sum, review) => sum + review.rating, 0) / course.reviews.length) * 10) / 10
+    : 0;
 
+  // Return course with additional calculated fields
+  return {
+    ...course,
+      discountedPrice: course.price - (course.price * course.discount / 100),
+    averageRating,
+    totalReviews: course.reviews.length
+  };
+};
 const updateCourse = async (
   id: string,
   payload: Partial<Course>

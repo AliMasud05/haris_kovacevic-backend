@@ -1,7 +1,7 @@
-import dotenv from "dotenv"
-import path from "path"
+import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config({ path: path.join(process.cwd(), ".env") })
+dotenv.config({ path: path.join(process.cwd(), ".env") });
 
 export default {
   env: process.env.NODE_ENV,
@@ -18,8 +18,16 @@ export default {
   },
   reset_pass_link: process.env.RESET_PASS_LINK,
   email: process.env.EMAIL,
-  brevo_email: process.env.EMAIL,
+  brevo_email: process.env.BREVO_EMAIL,
   brevo_pass: process.env.BREVO_PASS,
+  admin_email: process.env.ADMIN_EMAIL,
+  frontend_url: process.env.FRONTEND_URL,
+
+  paypal: {
+    client: process.env.PAYPAL_CLIENT_ID,
+    secret: process.env.PAYPAL_CLIENT_SECRET,
+    base_url: process.env.PAYPAL_BASE_URL,
+  },
 
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
 
@@ -27,4 +35,4 @@ export default {
   DO_ACCESS_KEY_ID: process.env.DO_SPACE_ACCESS_KEY,
   DO_SECRET_ACCESS_KEY: process.env.DO_SPACE_SECRET_KEY,
   DO_SPACES_BUCKET: process.env.DO_SPACE_BUCKET,
-}
+};

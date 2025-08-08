@@ -8,20 +8,33 @@ datasource db {
 }
 
 model User {
-  id           String     @id @default(cuid())
-  name         String
-  email        String     @unique
-  phoneNumber  String?
-  profileImage String?
-  password     String
-  role         UserRole   @default(USER)
-  status       UserStatus @default(ACTIVE)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id              String     @id @default(cuid())
+  name            String
+  email           String     @unique
+  phoneNumber     String?
+  profileImage    String?
+  password        String? @default("123456")
+  otp             Int?
+  expiresAt       DateTime?
+  isEmailVerified Boolean    @default(false)
+  role            UserRole   @default(USER)
+  status          UserStatus @default(ACTIVE)
+  fullAddress     String?
+  street          String?
+  houseNumber     String?
+  city            String?
+  state           String?
+  postalCode      String?
 
-  enrollments  Enrollment[]
-  reviews      Review[]
-  payments     Payment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  enrollments         Enrollment[]
+  reviews             Review[]
+  payments            Payment[]
+  resourceEnrollments ResourceEnrollment[]
+  resoursePayments    ResoursePayment[]
+  progress            Progress[]
 
   @@map("Users")
 }
@@ -38,37 +51,36 @@ enum UserStatus {
   BLOCKED
 }
 
-
-
 model Course {
-  id          String       @id @default(uuid())
-  title       String
-  subtitle    String
-  price       Float
-  courseType  CourseType
-  level       SkillLevel  
-  duration    Int
-  language    String
-  classes     String
-  description String
-  demoVideo   String
-  thumnail    String
-  status      CourseStatus @default(ONGOING)
-  modules     Module[]
-  
-  enrollments Enrollment[]
-  reviews     Review[]
-  payments    Payment[]
-  releaseDate DateTime?
+  id           String         @id @default(uuid())
+  title        String
+  subtitle     String
+  price        Float
+  discount     Float          @default(0)
+  courseType   CourseType
+  level        SkillLevel
+  duration     Int
+  language     String
+  classes      String
+  description  String
+  demoVideo    String
+  thumnail     String
+  status       CourseStatus   @default(ONGOING)
+  learningData LearningData[]
+  modules      Module[]
+  enrollments  Enrollment[]
+  reviews      Review[]
+  payments     Payment[]
+  releaseDate  DateTime?
 
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Module {
   id        String   @id @default(uuid())
   title     String
-  order     Int      
+  order     Int
   courseId  String
   course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   videos    Video[]
@@ -79,14 +91,16 @@ model Module {
 }
 
 model Video {
-  id        String   @id @default(uuid())
-  title     String
-  url       String
-  order     Int
-  moduleId  String
-  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  id             String          @id @default(uuid())
+  title          String
+  url            String
+  order          Int
+  moduleId       String
+  module         Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   videoResources VideoResource[]
-  createdAt DateTime @default(now())
+  progress       Progress[]
+  duration       Int?            @default(0) // Added duration in seconds
+  createdAt      DateTime        @default(now())
 
   @@index([moduleId])
   @@map("videos")
@@ -104,17 +118,45 @@ model VideoResource {
   @@index([videoId])
   @@map("video_resources")
 }
-model Resource {
+
+model LearningData {
   id        String   @id @default(uuid())
-  title      String
-  topic    String
-  type      ResourceType
-  status    ResourceStatus
-  price     Float?
-  thumbnail String?    
-  file       String 
+  comment   String
+  order     Int      @default(0)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([courseId])
+  @@map("learning_resources")
+}
+
+model Resource {
+  id          String               @id @default(uuid())
+  title       String
+  topic       String
+  type        ResourceType
+  status      ResourceStatus
+  price       Float?
+  thumbnail   String?
+  file        String
+  uses        String?
+  included    included[]
+  enrollments ResourceEnrollment[]
+  payments    ResoursePayment[]
+
   createdAt DateTime @default(now())
 }
+
+model included {
+  id         String   @id @default(uuid())
+  comment    String
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
 enum ResourceStatus {
   FREE
   PAID
@@ -125,11 +167,13 @@ enum ResourceType {
   DOC
   LINK
 }
+
 enum SkillLevel {
   BEGINNER
   INTERMEDIATE
   ADVANCED
 }
+
 enum CourseType {
   PAID
   FREE
@@ -139,16 +183,64 @@ enum CourseStatus {
   UPCOMING
   ONGOING
 }
+model Progress {
+  id           String     @id @default(uuid())
+  user         User       @relation(fields: [userId], references: [id])
+  userId       String
+  video        Video      @relation(fields: [videoId], references: [id])
+  videoId      String
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
+  enrollmentId String
+  progress     Int        @default(0) // Percentage watched (0-100)
+  isCompleted  Boolean    @default(false)
+  lastWatched  DateTime   @default(now())
+  completedAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
+  @@unique([userId, videoId, enrollmentId])
+  @@index([userId])
+  @@index([videoId])
+  @@index([enrollmentId])
+  @@map("progress")
+}
 model Enrollment {
-  id        String   @id @default(uuid())
-  userId    String
-  courseId  String
-  Amount    Float
+  id            String            @id @default(uuid())
+  userId        String
+  courseId      String
+  Amount        Float
+  discount      Float             @default(0)
   paymentStatus paymentStatusEnum @default(PENDING)
-  user      User     @relation(fields: [userId], references: [id])
-  course    Course   @relation(fields: [courseId], references: [id])
-  enrolledAt DateTime @default(now())
+  user          User              @relation(fields: [userId], references: [id])
+  course        Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress      Progress[]
+  enrolledAt    DateTime          @default(now())
+  completedAt   DateTime?
+  status        EnrollmentStatus  @default(ACTIVE) // Added enrollment status
+ refund        Refund[]
+ @@unique([userId, courseId])
+
+  @@index([userId])
+  @@index([courseId])
+  @@map("enrollments")
+}
+
+// Add EnrollmentStatus enum
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model ResourceEnrollment {
+  id            String            @id @default(uuid())
+  userId        String
+  resourceId    String
+  Amount        Float
+  paymentStatus paymentStatusEnum @default(PENDING)
+  user          User              @relation(fields: [userId], references: [id])
+  resource      Resource          @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  enrolledAt    DateTime          @default(now())
 }
 
 enum paymentStatusEnum {
@@ -159,20 +251,36 @@ enum paymentStatusEnum {
 }
 
 model Payment {
-  id            String        @id @default(uuid())
+  id            String            @id @default(uuid())
   courseId      String
   paymentMethod String // e.g., 'Credit Card', 'PayPal', 'Stripe'
   paymentStatus paymentStatusEnum @default(PENDING) // e.g., 'Pending', 'Completed', 'Failed'
-  paymentAmount Float         @default(0)
-  payableAmount Float         @default(0)
-  paymentDate   DateTime      @default(now())
+  paymentAmount Float             @default(0)
+  payableAmount Float             @default(0)
+  paymentDate   DateTime          @default(now())
+  transactionId String? // e.g., payment gateway transaction ID
+  discountAmount Float             @default(0)
+  userId        String
+  course        Course            @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @default(now())
+}
+
+model ResoursePayment {
+  id            String            @id @default(uuid())
+  paymentMethod String // e.g., 'Credit Card', 'PayPal', 'Stripe'
+  paymentStatus paymentStatusEnum @default(PENDING) // e.g., 'Pending', 'Completed', 'Failed'
+  paymentAmount Float             @default(0)
+  payableAmount Float             @default(0)
+  paymentDate   DateTime          @default(now())
   transactionId String? // e.g., payment gateway transaction ID
   userId        String
-
-  course        Course       @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  resourceId    String
+  resource      Resource          @relation(fields: [resourceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @default(now())
 }
 
 model Review {
@@ -182,22 +290,21 @@ model Review {
   userId    String
   courseId  String
   user      User     @relation(fields: [userId], references: [id])
-  course    Course   @relation(fields: [courseId], references: [id])
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }
 
-model Contact{
-  id        String   @id @default(uuid())
-  name      String
-  email     String
-  description String 
-
+model Contact {
+  id          String @id @default(uuid())
+  name        String
+  email       String
+  description String
 }
 
-model Subscription{
-  id        String   @id @default(uuid()) 
-  email     String 
-} 
+model Subscription {
+  id    String @id @default(uuid())
+  email String
+}
 
 model File {
   id        String   @id @default(uuid())
@@ -206,3 +313,26 @@ model File {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model MyResume {
+  id        String   @id @default(uuid())
+  url       String 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Refund {
+  id        String   @id @default(uuid())
+  userId    String
+  enrollmentId String
+  refuntStatus RefundStatus @default(PENDING)
+  enrollment  Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  invoice   String
+}
+
+enum RefundStatus {
+  PENDING
+  SUCCESS
+  CANCELLED
+}
+ 

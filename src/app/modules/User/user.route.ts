@@ -14,6 +14,12 @@ router.post(
 // *!get all  user
 router.get("/", userController.getUsers);
 
+// *!get user by id
+router.get(
+  "/:id",
+  userController.getUserById
+);
+
 // *!profile user
 router.put(
   "/profile",
@@ -22,6 +28,9 @@ router.put(
 );
 
 // *!update  user
-router.put("/:id", auth(UserRole.SUPER_ADMIN, UserRole.ADMIN), userController.updateUser);
+router.put("/:id",  userController.updateUser);
+router.post("/resend-otp", userController.resendOtp);
+
+
 
 export const userRoutes = router;

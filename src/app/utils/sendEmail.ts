@@ -1,36 +1,52 @@
+import config from "../../config";
 import nodemailer from 'nodemailer';
-import config from '../../config';
+import { IUploadFile } from "../../interfaces/file";
 
-
-export const sendEmail = async (to: string, subject: string, html: string) => {
+export const sendEmail = async (subject: string, to: string, html: string, files?: IUploadFile[]) => {
   try {
+    console.log("Creating transporter with config:", {
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: config.brevo_email,
+        pass: config.brevo_pass,
+      },
+    });
+
     const transporter = nodemailer.createTransport({
       host: "smtp-relay.brevo.com",
-      port: 2525,
-      secure: false, // Use TLS, `false` ensures STARTTLS
+      port: 587,
+      secure: false,
       auth: {
-        user: config.brevo_email, // Your email address
-        pass: config.brevo_pass, // Your app-specific password
+        user: config.brevo_email,
+        pass: config.brevo_pass,
       },
-    })
+    });
 
     const mailOptions = {
-      from: `"Support Team" <${config.email}>`, // Sender's name and email
-      to, // Recipient's email
-      subject, // Email subject
-      text: html.replace(/<[^>]+>/g, ''), // Generate plain text version by stripping HTML tags
-      html, // HTML email body
+      from: `"Support Team" <${config.email}>`,
+      to,
+      subject,
+      text: html.replace(/<[^>]+>/g, ""),
+      html,
+      attachments: files?.map((file) => ({
+        filename: file.originalname,
+        content: file.buffer,
+        contentType: file.mimetype,
+      })),
     };
 
-    // Send the email
-    const info = await transporter.sendMail(mailOptions);
+    console.log("Attempting to send email with options:", {
+      ...mailOptions,
+      html: "...", // Don't log full HTML
+    });
 
-    // Log the success message
+    const info = await transporter.sendMail(mailOptions);
     console.log(`Email sent: ${info.messageId}`);
     return info.messageId;
   } catch (error) {
-    // @ts-ignore
-    console.error(`Error sending email: ${error.message}`);
-    throw new Error('Failed to send email. Please try again later.');
+    console.error("Detailed email error:", error); // Log full error
+    throw new Error("Failed to send email. Please try again later.");
   }
 };

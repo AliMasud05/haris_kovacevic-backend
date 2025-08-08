@@ -20,6 +20,11 @@ router.get(
   auth(),
   AuthController.getMyProfile
 );
+router.get(
+  "/profile-with-progress",
+  auth(),
+  AuthController.getMyProfileWithProgress
+);
 
 router.put(
   "/change-password",
@@ -37,5 +42,11 @@ router.post(
   '/reset-password',
   AuthController.resetPassword
 )
+router.post(
+  '/verify-otp',
+  AuthController.verifyOtp
+)
+router.post("/google-login", AuthController.loginWithGoogle);
+
 
 export const AuthRoutes = router;

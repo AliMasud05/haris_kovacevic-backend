@@ -24,8 +24,8 @@ const getAllSubscriptions = catchAsync(async (req: Request, res: Response) => {
 });
 
 const unsubscribe = catchAsync(async (req: Request, res: Response) => {
-  const { email } = req.body;
-  const result = await SubscriptionService.unsubscribe(email);
+  const { id } = req.params;
+  const result = await SubscriptionService.unsubscribe(id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     message: "Unsubscribed successfully",

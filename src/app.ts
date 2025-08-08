@@ -9,11 +9,17 @@ import morgan from "morgan"
 
 const app: Application = express()
 export const corsOptions = {
-  origin: ["http://localhost:3001", "http://localhost:3000"],
+  origin: [
+    "http://localhost:3001",
+    "http://localhost:3000",
+    "http://172.252.13.75:7007",
+    "http://localhost:7007",
+    "https://hk-academy.com",
+  ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
-}
+};
 
 // Middleware setup
 app.use(cors(corsOptions))
@@ -51,3 +57,5 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 })
 
 export default app
+
+

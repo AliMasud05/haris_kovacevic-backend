@@ -10,7 +10,8 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
   const result = await userService.createUserIntoDb(req.body)
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: "User Registered successfully!",
+    message:
+      "User created successfully! An OTP has been sent to your email address. Please verify your email to activate your account.",
     data: result,
   })
 })
@@ -21,6 +22,17 @@ const getUsers = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     message: "Users retrieve successfully!",
+    data: result,
+  })
+})
+
+//get user by id
+const getUserById = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id
+  const result = await userService.getUserById(id)
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "User retrieved successfully!",
     data: result,
   })
 })
@@ -50,9 +62,22 @@ const updateUser = catchAsync(async (req: Request, res: Response) => {
   })
 })
 
+// *! resend otp
+const resendOtp = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const result = await userService.resendOtp(email);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Verification OTP has been resent to your email. Please check your inbox and verify your email within 10 minutes.",
+    data: result,
+  });
+});
+
 export const userController = {
   createUser,
   getUsers,
+  getUserById,
   updateProfile,
   updateUser,
+  resendOtp,
 }

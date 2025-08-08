@@ -4,7 +4,7 @@ import * as bcrypt from "bcrypt";
 
 export const initiateSuperAdmin = async () => {
   const payload: any = {
-    name: "Super",
+    name: "Super Admin",
     email: "admin@gmail.com",
     phoneNumber: "1234567890",
     password: "12345678",
